@@ -1,8 +1,8 @@
-import apiError from "../util/apiError.js";
-import apiResponse from "../util/apiResponse.js";
-import asyncHandler from "../util/asyncHandler.js";
-import { users } from "../models/users.models.js"
-import { generateAccessToken, generateRefreshToken, verifyTokens } from "../util/token.js"
+import apiError from "../utils/apiError.js";
+import apiResponse from "../utils/apiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import User from "../models/users.models.js"
+import { generateAccessToken, generateRefreshToken, verifyTokens } from "../utils/tokens.js"
 
 const generateTokens = async (userID) => {
 
@@ -19,11 +19,11 @@ const cookieOptions = {
 };
 const registerUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
-    const existedUser = await users.findOne({ email })
+    const existedUser = await User.findOne({ email })
     if (existedUser) {
         throw new apiError(400, "User already signed up with this email")
     }
-    const user = await users.create({
+    const user = await User.create({
         email,
         password
     })
@@ -33,7 +33,7 @@ const registerUser = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false })
 
     //return both tokens in cookies 
-    const createdUser = await users.findById(user._id).select(
+    const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
     if (!createdUser) {
@@ -60,7 +60,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new apiError(400, "Email not provided")
     }
 
-    const user = await users.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
         throw new apiError(400, "User does not exist. Please register")
     }
@@ -74,7 +74,7 @@ const loginUser = asyncHandler(async (req, res) => {
     //store only refresh tokens
     user.refreshToken = refreshToken
     await user.save({ validateBeforeSave: false })
-    const safeUser = await users.findById(user._id).select("-password -refreshToken");
+    const safeUser = await User.findById(user._id).select("-password -refreshToken");
     //return both tokens in cookies 
     return res.status(200).cookie("refreshToken", refreshToken, cookieOptions)
         .cookie("accessToken", accessToken, cookieOptions)

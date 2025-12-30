@@ -1,4 +1,4 @@
-import apiError from "../utils/apiError";
+import apiError from "../utils/apiError.js";
 
 export default function globalErrorHandler(err, req, res, next) {
     console.error(err);
