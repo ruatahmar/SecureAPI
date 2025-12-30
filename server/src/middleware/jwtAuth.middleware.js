@@ -1,6 +1,6 @@
-import apiError from "../util/apiError.js";
-import asyncHandler from "../util/asyncHandler.js";
-import { verifyTokens } from "../util/token.js";
+import apiError from "../utils/apiError.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { verifyTokens } from "../utils/tokens.js";
 
 const jwtAuth = asyncHandler(async (req, res, next) => {
     const accessToken = req.cookies?.accessToken //question mark here means optional chaining

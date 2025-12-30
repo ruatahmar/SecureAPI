@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-
+import bcrypt from "bcrypt"
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -22,11 +22,10 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 //hashes the password before saving and creating 
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
 
     this.password = await bcrypt.hash(this.password, 10);
-    next();
 });
 //function to compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {

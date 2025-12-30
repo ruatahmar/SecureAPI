@@ -1,4 +1,4 @@
-const requireRole = (role) => {
+const roleCheck = (role) => {
     return (req, _, next) => {
         if (req.user.role !== role) {
             throw new apiError(403, "Forbidden");
@@ -7,4 +7,4 @@ const requireRole = (role) => {
     };
 };
 
-export default requireRole;
+export default roleCheck;

@@ -4,9 +4,9 @@ import asyncHandler from "../utils/asyncHandler.js";
 import User from "../models/users.models.js"
 import { generateAccessToken, generateRefreshToken, verifyTokens } from "../utils/tokens.js"
 
-const generateTokens = async (userID) => {
+const generateTokens = async (userId) => {
 
-    const data = { userID }
+    const data = { userId }
     const accessToken = generateAccessToken(data)
     const refreshToken = generateRefreshToken(data)
 

@@ -4,8 +4,9 @@ export default function globalErrorHandler(err, req, res, next) {
     console.error(err);
 
     if (err instanceof apiError) {
-        return res.status(err.statusCode).json({
-            status: err.statusCode,
+        console.log(err.status)
+        return res.status(err.status).json({
+            status: err.status,
             message: err.message
         });
     }
