@@ -77,7 +77,6 @@ export default function TaskDashboard() {
             const nextStatus = task.status === 'completed' ? 'pending' : 'completed';
             const response = await updateTaskApi(id, { status: nextStatus });
             const updated = response.data.data
-            console.log(updated)
             setTasks(tasks.map(t => t._id === id ? updated : t));
         } catch (error) {
             console.error('Failed to update task status:', error);
