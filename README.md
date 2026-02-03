@@ -110,43 +110,69 @@ password: "Admin@123"
 | Admin | View & edit all tasks |
 
 **RBAC is enforced at the backend using middleware.**
-Folder Structure
-
-```css
-src/
-├── controllers/
-├── models/
-├── routes/
-├── middleware/
-├── utils/
-├── scripts/
-└── app.js
-```
-
-Scalability Considerations
-
-See the section below for scalability notes.
 
 ---
 
-## Short Scalability Note (put this in README or a separate `SCALABILITY.md`)
+## Folder Structure
 
-### Scalability Considerations
+**Backend**:
 
-- **Stateless Authentication**  
-  JWT-based authentication allows horizontal scaling since no session data is stored on the server.
+```css
+src/
+├── config/
+├── controllers/
+├── middleware/
+├── models/
+├── routes/
+├── scripts/
+├── utils/
+└── index.js
+```
 
-- **Caching**  
-  Frequently accessed data (e.g., task lists, admin dashboards) can be cached using **Redis** to reduce database load.
+**Frontend**:
 
-- **Database Scaling**  
-  MongoDB supports indexing and read replicas for handling increased read traffic.
+```css
+src/
+├── api/
+├── auth/
+├── pages/
+├── routes/
+├── utils/
+├── App.jsx
+├── index.css
+└── main.jsx
+```
 
-- **Microservices (Future Scope)**  
-  The system can be split into separate services such as:
-  - Auth Service
-  - Task Service  
-    allowing independent scaling and deployment.
+---
 
-- **Load Balancing**  
-  Multiple instances of the backend can be run behind a load balancer (e.g., Nginx) to distribute traffic.
+## Scalability & System Design Notes
+
+This system is designed as a **stateless REST API** with JWT-based authentication, which allows multiple backend instances to run in parallel without shared session state.
+
+### Auth & RBAC Scaling
+
+- Authentication is handled via short-lived access tokens and rotated refresh tokens, avoiding server-side sessions.
+
+- RBAC checks are enforced at the API layer and scale linearly with request volume, since role information is embedded in the token payload.
+
+- Admin privileges are tightly controlled through a bootstrap script, preventing role escalation via public endpoints.
+
+### Data Access Patterns
+
+- The dominant access pattern is user-scoped task queries filtered by `userId`, which scale well with indexing.
+- Admin access reuses the same endpoints but executes broader queries; these paths can be paginated or rate-limited if needed to prevent heavy reads from impacting regular users.
+- Using a single schema and endpoint keeps the system simple and avoids duplication while still allowing differentiated behavior through authorization logic.
+
+### Horizontal Scaling
+
+- Because the API is stateless, it can be horizontally scaled behind a load balancer without modification.
+
+- Token verification is CPU-bound and predictable, making it suitable for scale-out rather than scale-up.
+
+### Future Optimizations (If Load Increases)
+
+- Introduce Redis for caching frequently accessed admin dashboards or aggregated task views.
+
+- Add request-level pagination and limits to keep worst-case queries bounded.
+
+- Multiple instances of the backend can be run behind a load balancer (e.g., Nginx) to distribute traffic.

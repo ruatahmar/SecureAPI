@@ -3,7 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { verifyTokens } from "../utils/tokens.js";
 
 const jwtAuth = asyncHandler(async (req, res, next) => {
-    const accessToken = req.cookies?.accessToken //question mark here means optional chaining
+    const accessToken = req.cookies?.accessToken
     if (!accessToken) {
         throw new apiError(401, "Authentication required ")
     }
