@@ -1,38 +1,40 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { login } from "../api/auth";
+import { useAuth } from "../auth/useAuth";
 
 export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-  
-    const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const handleRedirect = () => {
-        navigate('/register'); 
+  const navigate = useNavigate();
+  const { setUser } = useAuth()
+  const handleRedirect = (e) => {
+    e.preventDefault()
+    navigate('/register');
   };
   const handleLogin = async (e) => {
-    
-    e.preventDefault(); 
+
+    e.preventDefault();
     try {
-        console.log(JSON.stringify({ email, password }))
-        const response = await login({ email, password })
-        console.log('Login successful:', response.data);
-        navigate('/dashboard');
+      const response = await login({ email, password })
+      console.log(response.data.message);
+      setUser(response.data.data)
+      navigate('/dashboard');
     } catch (error) {
-        const message = error.response?.data?.message || "Registration failed";
-        console.error('Error logging in:', message);
-        alert('Something went wrong. Please try again.', message);
+      const message = error.response?.data?.message || "Registration failed";
+      console.error('Error logging in:', message);
+      alert('Something went wrong. Please try again.', message);
     }
   };
 
-  
+
 
   return (
-    <div className="min-h-screen flex items-center justify-center flex-col">
+    <div className="min-h-screen flex items-center justify-center flex-col bg-black/60">
       <form
         onSubmit={handleLogin}
-        className="bg-white p-6 rounded-xl shadow-md w-80 flex flex-col gap-4"
+        className="bg-black/80 text-white p-6 rounded-xl shadow-md w-80 flex flex-col gap-4"
       >
         <h1 className="text-xl font-semibold text-center">Login</h1>
 
@@ -51,7 +53,7 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        
+
         <button
           type="submit"
           className="bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
@@ -59,13 +61,13 @@ export default function Login() {
           Login
         </button>
         <button
-          onClick={handleRedirect }
+          onClick={handleRedirect}
           className="bg-purple-600 text-white py-2 m rounded hover:bg-purple-700"
         >
           Register
         </button>
       </form>
-      
+
     </div>
   );
 }

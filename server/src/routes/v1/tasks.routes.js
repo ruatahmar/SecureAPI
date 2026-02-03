@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { createTask, getTasks, updateTask, deleteTask } from "../controllers/tasks.controller.js"
-import jwtAuth from "../middleware/jwtAuth.middleware.js";
+import { createTask, getTasks, updateTask, deleteTask } from "../../controllers/v1/tasks.controller.js"
+import jwtAuth from "../../middleware/jwtAuth.middleware.js";
 
 const taskRouter = Router()
 

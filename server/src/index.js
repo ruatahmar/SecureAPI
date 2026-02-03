@@ -2,8 +2,8 @@ import express from "express"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import connectDb from "./config/db.js"
-import authRouter from "./routes/auth.routes.js"
-import taskRouter from "./routes/tasks.routes.js"
+import authRouter from "./routes/v1/auth.routes.js"
+import taskRouter from "./routes/v1/tasks.routes.js"
 import globalErrorHandler from "./middleware/globalErrorHandler.middleware.js"
 
 
@@ -19,8 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //routes
-app.use("/api/auth", authRouter)
-app.use("/api/task", taskRouter)
+app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/tasks", taskRouter)
 
 //global error handler must be last
 app.use(globalErrorHandler)

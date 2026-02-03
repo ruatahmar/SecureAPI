@@ -8,6 +8,7 @@ const jwtAuth = asyncHandler(async (req, res, next) => {
         throw new apiError(401, "Authentication required ")
     }
     const payload = verifyTokens(accessToken, "access")
+    console.log(payload)
     req.user = payload
     next()
 })

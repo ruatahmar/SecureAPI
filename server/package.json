@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch --env-file=.env src/index"
+    "dev": "node --watch --env-file=.env src/index",
+    "admin": "node --env-file=.env src/scripts/seedAdmin.js"
   },
   "keywords": [],
   "author": "",

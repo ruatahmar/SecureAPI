@@ -1,12 +1,13 @@
-import apiError from "../utils/apiError.js";
-import apiResponse from "../utils/apiResponse.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import User from "../models/users.models.js"
-import { generateAccessToken, generateRefreshToken, verifyTokens } from "../utils/tokens.js"
+import apiError from "../../utils/apiError.js";
+import apiResponse from "../../utils/apiResponse.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import User from "../../models/v1/users.models.js"
+import { generateAccessToken, generateRefreshToken, verifyTokens } from "../../utils/tokens.js"
 
-const generateTokens = async (userId) => {
 
-    const data = { userId }
+const generateTokens = (payload) => {
+
+    const data = payload
     const accessToken = generateAccessToken(data)
     const refreshToken = generateRefreshToken(data)
 
@@ -23,11 +24,13 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existedUser) {
         throw new apiError(400, "User already signed up with this email")
     }
+
     const user = await User.create({
         email,
         password
     })
-    const { accessToken, refreshToken } = await generateTokens(user._id)
+    const userId = user._id
+    const { accessToken, refreshToken } = generateTokens({ userId, role: user.role })
     //store only refresh tokens
     user.refreshToken = refreshToken
     await user.save({ validateBeforeSave: false })
@@ -60,7 +63,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new apiError(400, "Email not provided")
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password")
     if (!user) {
         throw new apiError(400, "User does not exist. Please register")
     }
@@ -69,8 +72,9 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!isMatch) {
         throw new apiError(400, "Incorrect password")
     }
-
-    const { accessToken, refreshToken } = await generateTokens(user._id)
+    console.log(user.role)
+    const userId = user._id
+    const { accessToken, refreshToken } = generateTokens({ userId, role: user.role })
     //store only refresh tokens
     user.refreshToken = refreshToken
     await user.save({ validateBeforeSave: false })
@@ -88,7 +92,44 @@ const loginUser = asyncHandler(async (req, res) => {
             )
         )
 })
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies.refreshToken
+    if (!refreshToken) {
+        throw new apiError(401, "Refresh token missing")
+    }
+    const payload = verifyTokens(refreshToken, "refresh")
+    console.log(payload)
+    const userId = payload.userId
+    const user = await User.findById(userId)
+    if (!user) {
+        throw new apiError(401, "User not found")
+    }
+    if (refreshToken !== user.refreshToken) {
+        throw new apiError(400, "Invalid refresh token")
+    }
 
-const logoutUser = asyncHandler()
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens({ userId, role: user.role })
 
-export { registerUser, loginUser, logoutUser }
+    user.refreshToken = newRefreshToken;
+    await user.save({ validateBeforeSave: false })
+    return res.status(200)
+        .cookie("accessToken", newAccessToken, cookieOptions)
+        .cookie("refreshToken", newRefreshToken, cookieOptions)
+        .json(
+            new apiResponse(200, { user }, "Access Token refreshed")
+        )
+
+})
+const logoutUser = asyncHandler(async (req, res) => {
+    const { userId } = req.user;
+    await User.updateOne(
+        { id: userId },
+        { $set: { refreshToken: null } }
+    )
+    return res.status(200).clearCookie("accessToken", cookieOptions).clearCookie("refreshToken", cookieOptions)
+        .json(
+            new apiResponse(200, {}, "Successfully Logged out")
+        )
+})
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken }  

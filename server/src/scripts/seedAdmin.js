@@ -1,14 +1,20 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import User from "../models/users.models";
+import User from "../models/v1/users.models.js";
 
-await mongoose.connect(process.env.MONGO_URL);
+async function createAdmin() {
+    try {
+        await mongoose.connect(`${process.env.MONGO_URL}${process.env.DB_NAME}`);
+        await User.create({
+            email: "admin@demo.com",
+            password: "Admin@123",
+            role: "admin"
+        });
 
-await User.create({
-    email: "admin@demo.com",
-    password: await bcrypt.hash("Admin@123", 10),
-    role: "admin"
-});
+    } catch (error) {
+        console.error(error)
+    }
 
-console.log("Admin user created");
-process.exit();
+    console.log("Admin user created");
+    process.exit();
+}
+createAdmin()
