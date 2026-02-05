@@ -86,7 +86,8 @@ This will create a predefined admin user in the database with
 email: "admin@demo.com"
 password: "Admin@123"
 ```
-
+## Endpoints
+[Postman endpoints](https://www.postman.com/payload-specialist-54019853/workspace/public-workspace/collection/40210596-9e342add-f2c4-4d0c-922c-af2c27a2fa16?action=share&creator=40210596&active-environment=40210596-b4473656-15c7-4e84-8594-2975d049dd15)
 ## Authentication Flow
 
 - Users authenticate using email and password
